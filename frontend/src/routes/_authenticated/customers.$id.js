@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Pencil, Trash2, FileText, Download, ArrowLeft } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { deleteCustomer, getCustomerById, getCustomerPayments } from "@/services/customer-service";
 import { formatINR, formatDate, formatTime } from "@/lib/format";
 import { getConsentUrl } from "@/lib/consent";
 import { downloadReceipt } from "@/lib/receipt";
@@ -60,12 +60,12 @@ function CustomerDetailPage() {
   const [deleting, setDeleting] = useState(false);
   const customer = useQuery({
     queryKey: ["customer", id],
-    queryFn: async () => {
-      queryFn: () => getCustomerById(id),
+    queryFn: () => getCustomerById(id),
+  });
   const payments = useQuery({
     queryKey: ["payments", id],
-    queryFn: async () => {
-      queryFn: () => getCustomerPayments(id),
+    queryFn: () => getCustomerPayments(id),
+  });
   if (customer.isLoading) return _jsx(Skeleton, { className: "h-96 w-full" });
   if (!customer.data)
     return _jsx("p", {
@@ -81,8 +81,7 @@ function CustomerDetailPage() {
   };
   const onDelete = async () => {
     setDeleting(true);
-    const { error } = await supabase.from("customers").delete().eq("id", id);
-      const { error } = await deleteCustomer(id);
+    const { error } = await deleteCustomer(id);
     if (error) {
       toast.error("Could not delete this customer");
       return;

@@ -4,7 +4,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Search, UserPlus, Download } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { PAYMENT_METHODS, paymentSchema } from "@/lib/schemas";
 import { formatINR, formatDate, todayISO, nowTime } from "@/lib/format";
 import { downloadReceipt } from "@/lib/receipt";
@@ -20,6 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createPayment } from "@/services/payment-service";
+import { getCustomerSummary, searchCustomers } from "@/services/customer-service";
 export const Route = createFileRoute("/_authenticated/payments/new")({
   head: () => ({
     meta: [
@@ -49,12 +50,7 @@ function AddPaymentPage() {
     setSearching(true);
     setSelected(null);
     setSaved(null);
-    let q = supabase
-      .from("customers")
-      .select("id, name, phone, account_no, status, repayable_amount, pending_amount");
-    if (name.trim()) q = q.ilike("name", `%${name.trim()}%`);
-    if (phone.trim()) q = q.ilike("phone", `%${phone.trim()}%`);
-    const { data, error } = await q.order("name").limit(20);
+    const { data, error } = await searchCustomers({ name, phone });
     setSearching(false);
     setSearched(true);
     if (error) {
@@ -64,11 +60,7 @@ function AddPaymentPage() {
     setMatches(data ?? []);
   };
   const refreshSelected = async (id) => {
-    const { data } = await supabase
-      .from("customers")
-      .select("id, name, phone, account_no, status, repayable_amount, pending_amount")
-      .eq("id", id)
-      .single();
+    const { data } = await getCustomerSummary(id);
     if (data) setSelected(data);
   };
   const submitPayment = async (e) => {
@@ -95,13 +87,7 @@ function AddPaymentPage() {
       toast.error("This loan is already closed");
       return;
     }
-    const { data, error } = await supabase
-      .from("payments")
-      .insert({
-        const { data, error } = await searchCustomers({ name, phone });
-      })
-      .select("id")
-      .single();
+    const { data, error } = await createPayment(selected.id, parsed.data);
     if (error || !data) {
       toast.error("Could not save this payment");
       return;
@@ -139,7 +125,17 @@ function AddPaymentPage() {
       }),
       _jsxs(Card, {
         children: [
-        const { data, error } = await createPayment(selected.id, parsed.data);
+          _jsx(CardContent, {
+            children: _jsxs("form", {
+              onSubmit: search,
+              className: "flex flex-wrap items-end gap-3",
+              children: [
+                _jsxs("div", {
+                  className: "min-w-48 flex-1 space-y-1.5",
+                  children: [
+                    _jsx(Label, { htmlFor: "s-name", children: "Customer name" }),
+                    _jsx(Input, {
+                      id: "s-name",
                       value: name,
                       onChange: (e) => setName(e.target.value),
                       placeholder: "e.g. Mahendra Kumar",

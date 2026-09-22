@@ -8,3 +8,13 @@ export async function getCurrentUser() {
 export async function signInWithEmailPassword(email, password) {
   return supabase.auth.signInWithPassword({ email, password });
 }
+
+export async function getAdminRole(userId) {
+  const { data, error } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  return { role: data?.role ?? null, error };
+}

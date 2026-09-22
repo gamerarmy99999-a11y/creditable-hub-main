@@ -2,10 +2,10 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { uploadConsent } from "@/lib/consent";
 import { CustomerForm } from "@/components/CustomerForm";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getCustomerById, updateCustomer } from "@/services/customer-service";
 export const Route = createFileRoute("/_authenticated/customers/$id/edit")({
   head: () => ({
     meta: [
@@ -23,11 +23,7 @@ function EditCustomerPage() {
   const queryClient = useQueryClient();
   const customer = useQuery({
     queryKey: ["customer", id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("customers").select("*").eq("id", id).single();
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => getCustomerById(id),
   });
   if (customer.isLoading) return _jsx(Skeleton, { className: "h-96 w-full max-w-4xl" });
   if (!customer.data)
@@ -74,10 +70,7 @@ function EditCustomerPage() {
               toast.warning("The consent form could not be uploaded.");
             }
           }
-          const { error } = await supabase
-            .from("customers")
-            .update({ ...values, consent_form_path: consentPath })
-            .eq("id", id);
+          const { error } = await updateCustomer(id, values, consentPath);
           if (error) {
             toast.error(
               error.code === "23505"

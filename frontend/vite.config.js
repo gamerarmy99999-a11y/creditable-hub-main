@@ -7,6 +7,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   root: "./frontend",
+  envDir: "..",
   build: {
     rollupOptions: {
       output: {

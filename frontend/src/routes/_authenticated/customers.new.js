@@ -2,9 +2,13 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { uploadConsent } from "@/lib/consent";
 import { CustomerForm } from "@/components/CustomerForm";
+import {
+  createCustomer,
+  findDuplicateCustomer,
+  updateCustomerConsent,
+} from "@/services/customer-service";
 export const Route = createFileRoute("/_authenticated/customers/new")({
   head: () => ({
     meta: [
@@ -40,16 +44,12 @@ function AddCustomerPage() {
       _jsx(CustomerForm, {
         submitLabel: "Save customer",
         onSubmit: async (values, file) => {
-          const { data: dupe } = await supabase
-            .from("customers")
-            .select("id, phone, aadhar_no")
-            .or(`phone.eq.${values.phone},aadhar_no.eq.${values.aadhar_no}`)
-            .maybeSingle();
+          const { data: dupe } = await findDuplicateCustomer(values.phone, values.aadhar_no);
           if (dupe) {
             toast.error("A customer with this phone number or Aadhaar already exists.");
             return;
           }
-            const { data, error } = await createCustomer(values);
+          const { data, error } = await createCustomer(values);
           if (error || !data) {
             toast.error(error?.message ?? "Could not save this customer");
             return;
@@ -57,7 +57,7 @@ function AddCustomerPage() {
           if (file) {
             try {
               const path = await uploadConsent(data.id, file);
-                await updateCustomerConsent(data.id, path);
+              await updateCustomerConsent(data.id, path);
             } catch {
               toast.warning("Customer saved, but the consent form could not be uploaded.");
             }

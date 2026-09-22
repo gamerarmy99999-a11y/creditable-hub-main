@@ -1,7 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const CUSTOMER_SUMMARY =
-  "id, name, phone, account_no, status, repayable_amount, pending_amount";
+const CUSTOMER_SUMMARY = "id, name, phone, account_no, status, repayable_amount, pending_amount";
 
 export async function getCustomerById(id) {
   const { data, error } = await supabase.from("customers").select("*").eq("id", id).single();
@@ -53,4 +52,11 @@ export async function findDuplicateCustomer(phone, aadharNo) {
 
 export async function updateCustomerConsent(id, path) {
   return supabase.from("customers").update({ consent_form_path: path }).eq("id", id);
+}
+
+export async function updateCustomer(id, values, consentPath) {
+  return supabase
+    .from("customers")
+    .update({ ...values, consent_form_path: consentPath })
+    .eq("id", id);
 }
