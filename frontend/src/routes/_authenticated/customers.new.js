@@ -49,11 +49,7 @@ function AddCustomerPage() {
             toast.error("A customer with this phone number or Aadhaar already exists.");
             return;
           }
-          const { data, error } = await supabase
-            .from("customers")
-            .insert({ ...values, pending_amount: values.repayable_amount })
-            .select("id")
-            .single();
+            const { data, error } = await createCustomer(values);
           if (error || !data) {
             toast.error(error?.message ?? "Could not save this customer");
             return;
@@ -61,10 +57,7 @@ function AddCustomerPage() {
           if (file) {
             try {
               const path = await uploadConsent(data.id, file);
-              await supabase
-                .from("customers")
-                .update({ consent_form_path: path })
-                .eq("id", data.id);
+                await updateCustomerConsent(data.id, path);
             } catch {
               toast.warning("Customer saved, but the consent form could not be uploaded.");
             }

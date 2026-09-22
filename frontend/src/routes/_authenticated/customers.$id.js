@@ -61,24 +61,11 @@ function CustomerDetailPage() {
   const customer = useQuery({
     queryKey: ["customer", id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("customers").select("*").eq("id", id).single();
-      if (error) throw error;
-      return data;
-    },
-  });
+      queryFn: () => getCustomerById(id),
   const payments = useQuery({
     queryKey: ["payments", id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("payments")
-        .select("*")
-        .eq("customer_id", id)
-        .order("paid_date", { ascending: false })
-        .order("paid_time", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-  });
+      queryFn: () => getCustomerPayments(id),
   if (customer.isLoading) return _jsx(Skeleton, { className: "h-96 w-full" });
   if (!customer.data)
     return _jsx("p", {
@@ -95,7 +82,7 @@ function CustomerDetailPage() {
   const onDelete = async () => {
     setDeleting(true);
     const { error } = await supabase.from("customers").delete().eq("id", id);
-    setDeleting(false);
+      const { error } = await deleteCustomer(id);
     if (error) {
       toast.error("Could not delete this customer");
       return;

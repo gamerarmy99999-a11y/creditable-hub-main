@@ -98,12 +98,7 @@ function AddPaymentPage() {
     const { data, error } = await supabase
       .from("payments")
       .insert({
-        customer_id: selected.id,
-        amount: parsed.data.amount,
-        paid_date: parsed.data.paid_date,
-        paid_time: parsed.data.paid_time,
-        payment_method: parsed.data.payment_method,
-        note: parsed.data.note || null,
+        const { data, error } = await searchCustomers({ name, phone });
       })
       .select("id")
       .single();
@@ -144,18 +139,7 @@ function AddPaymentPage() {
       }),
       _jsxs(Card, {
         children: [
-          _jsx(CardHeader, { children: _jsx(CardTitle, { children: "Find customer" }) }),
-          _jsx(CardContent, {
-            children: _jsxs("form", {
-              onSubmit: search,
-              className: "flex flex-wrap items-end gap-3",
-              children: [
-                _jsxs("div", {
-                  className: "min-w-48 flex-1 space-y-1.5",
-                  children: [
-                    _jsx(Label, { htmlFor: "s-name", children: "Customer name" }),
-                    _jsx(Input, {
-                      id: "s-name",
+        const { data, error } = await createPayment(selected.id, parsed.data);
                       value: name,
                       onChange: (e) => setName(e.target.value),
                       placeholder: "e.g. Mahendra Kumar",
