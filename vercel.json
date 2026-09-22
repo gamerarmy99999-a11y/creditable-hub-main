@@ -1,4 +1,3 @@
 {
-  "buildCommand": "NITRO_PRESET=vercel npm run build",
-  "outputDirectory": "frontend/.vercel/output"
+  "buildCommand": "NITRO_PRESET=vercel npm run build && node -e \"const fs=require('fs'); fs.mkdirSync('.vercel',{recursive:true}); fs.rmSync('.vercel/output',{recursive:true,force:true}); fs.cpSync('frontend/.vercel/output','.vercel/output',{recursive:true})\""
 }
