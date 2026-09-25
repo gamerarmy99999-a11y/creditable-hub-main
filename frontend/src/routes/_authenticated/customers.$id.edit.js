@@ -62,6 +62,11 @@ function EditCustomerPage() {
           witness_address: c.witness_address,
         },
         onSubmit: async (values, file) => {
+          const totalPaid = Number(c.total_paid ?? 0);
+          if (values.repayable_amount < totalPaid) {
+            toast.error(`Repayable amount cannot be less than total paid (${totalPaid}).`);
+            return;
+          }
           let consentPath = c.consent_form_path;
           if (file) {
             try {

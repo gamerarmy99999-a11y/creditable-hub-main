@@ -43,7 +43,7 @@ Shri Balaji Ledger is an admin-only web application for managing customers, loan
 
 4. Start the development server:
 
-	```sh
+	```
 	npm run dev
 	```
 
